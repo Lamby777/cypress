@@ -3,7 +3,7 @@
 * https://github.com/Lamby777/yx
 */
 
-use sh_inline;
+use sh_inline::*;
 
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
 
@@ -20,9 +20,11 @@ pub fn main(args: Vec<String>) {
 
 	match cmd {
 		"init" => {
-			assert_argc(args, 0);
+			assert_argc(args, &[0]);
 			sub::init()
 		},
+
+		"passwd" => {},
 
         _ => todo!()
     }
@@ -48,4 +50,3 @@ fn cmd_replace_aliases<'a>(cmd: &'a String) -> &'a str {
 		_		=> &cmd
 	}
 }
-

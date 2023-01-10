@@ -1,6 +1,6 @@
 // Subcommand stuff
 
-use crate::sh_inline;
+use crate::bash;
 
 pub fn init() {
 	bash!(include_str!("init.sh"));

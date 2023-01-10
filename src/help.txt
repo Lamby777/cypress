@@ -12,3 +12,6 @@ stuff that generally gives ~30 points in rounds 1 and 2)
 
 `pizza passwd <password>`
 - Sets the password for all users to the one given (gives some points for fixing weak passwords)
+
+`pizza passwd em <password>`
+- Runs the passwd command for all "except me" (current user)
