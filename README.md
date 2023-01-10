@@ -1,2 +1,5 @@
 # Pizza
- CyPatrina V2 (CyberPatriot hardening toolkit)
+Open-source Linux system hardening toolkit
+created for CyberPatriot
+
+Go `Deep-Fried Tables`!
