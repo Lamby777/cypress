@@ -3,7 +3,11 @@
 * https://github.com/Lamby777/yx
 */
 
+use sh_inline;
+
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
+
+mod sub;
 
 pub fn main(args: Vec<String>) {
     if args.len() < 2 { return show_help(); }
@@ -15,6 +19,11 @@ pub fn main(args: Vec<String>) {
 	let cmd = cmd_replace_aliases(cmd);
 
 	match cmd {
+		"init" => {
+			assert_argc(args, 0);
+			sub::init()
+		},
+
         _ => todo!()
     }
 }
