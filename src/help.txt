@@ -1,0 +1,14 @@
+Pizza (CyPatrina V2) Commands List:
+
+`pizza init`
+- Run initialization commands (installs and does easily reversible
+stuff that generally gives ~30 points in rounds 1 and 2)
+
+`pizza list users`
+- List the users on this system, and their privileges
+
+`pizza list sudo`
+- List the names of all users with sudo access
+
+`pizza passwd <password>`
+- Sets the password for all users to the one given (gives some points for fixing weak passwords)

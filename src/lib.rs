@@ -1,0 +1,42 @@
+/*
+* You're probably gonna recognize a lot of this code from
+* https://github.com/Lamby777/yx
+*/
+
+const LINE_SEPARATOR: &str	= "--------------------------------------------------";
+
+pub fn main(args: Vec<String>) {
+    if args.len() < 2 { return show_help(); }
+
+    // --stolen-- BORROWED from yx code :D
+	let cmd = &args[1].to_lowercase();
+	let args = &args[2..];
+
+	let cmd = cmd_replace_aliases(cmd);
+
+	match cmd {
+        _ => todo!()
+    }
+}
+
+pub fn show_help() {
+	println!("{}\n{}{}\n", LINE_SEPARATOR, include_str!("help.txt"), LINE_SEPARATOR);
+}
+
+pub fn assert_argc(args: &[String], lens: &[usize]) {
+	let len = args.len();
+
+	let mapped: Vec<String> = lens.iter().map(|&id| id.to_string()).collect();
+	let joined = mapped.join("|");
+
+	if !lens.contains(&len) {
+		panic!("This subcommand requires {} arguments, but you only gave {}!", joined, len);
+	}
+}
+
+fn cmd_replace_aliases<'a>(cmd: &'a String) -> &'a str {
+	match cmd.as_str() {
+		_		=> &cmd
+	}
+}
+

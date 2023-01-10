@@ -1,3 +1,4 @@
+// Pass args stuff into lib.rs
 fn main() {
-    println!("Hello, world!");
+	pizza::main(std::env::args().collect::<Vec<String>>());
 }
