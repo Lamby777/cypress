@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 sh-inline = "0.4.0"
+users = "0.11.0"

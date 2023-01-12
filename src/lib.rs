@@ -4,6 +4,7 @@
 */
 
 use sh_inline::*;
+use users::*;
 
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
 
@@ -24,7 +25,10 @@ pub fn main(args: Vec<String>) {
 			sub::init()
 		},
 
-		"passwd" => {},
+		"passwd" => {
+			assert_argc(args, &[1, 2]);
+			sub::passwd(args)
+		},
 
         _ => todo!()
     }
