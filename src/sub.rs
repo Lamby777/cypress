@@ -3,7 +3,12 @@
 use crate::bash;
 
 pub fn init() {
-	bash!(include_str!("init.sh"));
+	let res = bash!(include_str!("sh/init.sh"));
 	println!("\nCyPatrina init script complete!");
-	println!("Please ensure none of its changes caused you to lose points...");
+
+	if res.is_err() {
+		println!("Failed to complete CyPatrina init script...");
+	} else {
+		println!("Please ensure none of its changes caused you to lose points...");
+	}
 }

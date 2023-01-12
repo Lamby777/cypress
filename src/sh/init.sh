@@ -5,4 +5,5 @@ sudo apt update
 sudo apt -y upgrade
 
 # Install all these packages, whether it be for points, or for more efficient patching
-sudo apt -y install python3 libpam-cracklib ufw gufw aptitude
+sudo apt -y install python3 ufw gufw aptitude
+sudo apt install libpam-cracklib
