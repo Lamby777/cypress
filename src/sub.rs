@@ -24,18 +24,24 @@ pub fn passwd(args: &[String]) {
 	let new_pass = args.last().unwrap();
 	let current_uid = get_current_uid();
 
+	let mut errors = 0u16;
+
 	for user in users {
 		if em && (user.uid() == current_uid) { continue };
 
 		let name = user.name().to_string_lossy();
 
-		let cmd = format!("echo \"{}:{}\" | sudo chpasswd", new_pass, name);
+		let cmd = format!("sudo passwd {} <<< \"{}\"$'\n'\"{}\"", name, new_pass, new_pass);
 
 		if bash!(cmd).is_err() {
-			println!("There was a problem changing passwords...");
-		} else {
-			println!("Passwords updated successfully!");
+			errors += 1;
 		}
+	}
+
+	if errors > 0 {
+		println!("{} passwords had issues being updated...", errors);
+	} else {
+		println!("Passwords updated successfully!");
 	}
 }
 
