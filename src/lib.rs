@@ -58,19 +58,21 @@ pub fn main(args: Vec<String>) {
 				let page = &page.to_lowercase();
 
 				let page = match page.as_str() {
-					"guide"		=> "checklist",
+					"checklist" |
+					"guide"		=> "clist",
+
 					_			=> page
 				};
 
 				println!("Page: `{}`\n{}", page, LINE_SEPARATOR);
 
 				let out = match page {
-					"checklist" => include_str!("refs/checklist.txt"),
+					"clist"	=> include_str!("refs/checklist.txt"),
 
-					"apt"		=> include_str!("refs/apt.txt"),
-					"dnf"		=> include_str!("refs/dnf.txt"),
+					"apt"	=> include_str!("refs/apt.txt"),
+					"dnf"	=> include_str!("refs/dnf.txt"),
 
-					_			=> panic!("Not found!")
+					_		=> panic!("Not found!")
 				};
 
 				println!("{}", out);

@@ -1,2 +1,5 @@
 - Check if package is installed:
 dpkg -s package
+
+- Search installed packages:
+apt list --installed | grep [name]
