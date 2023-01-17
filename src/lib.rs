@@ -20,15 +20,39 @@ pub fn main(args: Vec<String>) {
 	let cmd = cmd_replace_aliases(cmd);
 
 	match cmd {
-		"init" => {
+		"init"		=> {
 			assert_argc(args, &[0]);
 			sub::init()
 		},
 
-		"passwd" => {
+		"passwd"	=> {
 			assert_argc(args, &[1, 2]);
 			sub::passwd(args)
 		},
+
+		"list"		=> {
+			assert_argc(args, &[0, 1]);
+			
+			// unwrap_or requires an unnecessary String, at least the way I tried :/
+			let mode: &str = match args.first() {
+				Some(i) => i,
+				None => "list"
+			};
+
+			match mode {
+				"sudo"		=> {
+					sub::list_sudo_users();
+				},
+
+				"users"		=> {
+					sub::list_users();
+				}
+
+				_			=> {
+					println!("Invalid mode!");
+				}
+			}
+		}
 
         _ => todo!()
     }

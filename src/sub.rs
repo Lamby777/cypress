@@ -36,6 +36,18 @@ pub fn passwd(args: &[String]) {
 	}
 }
 
+pub fn list_users() {
+	for_each_user(|user| {
+		todo!()
+	}, None);
+}
+
+pub fn list_sudo_users() {
+	for_each_user(|user| {
+		todo!()
+	}, None);
+}
+
 // returns number of fails
 fn for_each_user<C>(action: C, except: Option<u32>) -> u16
 	where C: Fn(User) -> bool {
