@@ -40,19 +40,44 @@ pub fn main(args: Vec<String>) {
 			};
 
 			match mode {
-				"sudo"		=> {
+				"sudo"	=> {
 					sub::list_sudo_users();
 				},
 
-				"users"		=> {
+				_		=> {
 					sub::list_users();
 				}
-
-				_			=> {
-					println!("Invalid mode!");
-				}
 			}
-		}
+		},
+
+		"refs"		=> {
+			assert_argc(args, &[0, 1]);
+
+			if let Some(page) = args.first() {
+				// resolve aliases
+				let page = &page.to_lowercase();
+
+				let page = match page.as_str() {
+					"guide"		=> "checklist",
+					_			=> page
+				};
+
+				println!("Page: `{}`\n{}", page, LINE_SEPARATOR);
+
+				let out = match page {
+					"checklist" => include_str!("refs/checklist.txt"),
+
+					"apt"		=> include_str!("refs/apt.txt"),
+					"dnf"		=> include_str!("refs/dnf.txt"),
+
+					_			=> panic!("Not found!")
+				};
+
+				println!("{}", out);
+			} else {
+				println!(include_str!("refs/pages.txt"));
+			}
+		},
 
         _ => todo!()
     }
