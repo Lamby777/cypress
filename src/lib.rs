@@ -44,12 +44,8 @@ pub fn main(args: Vec<String>) {
 					sub::list_sudo_users();
 				},
 
-				"users"		=> {
+				"users"	| _	=> {
 					sub::list_users();
-				}
-
-				_			=> {
-					println!("Invalid mode!");
 				}
 			}
 		}
