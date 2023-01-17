@@ -25,6 +25,11 @@ pub fn main(args: Vec<String>) {
 			sub::init()
 		},
 
+		"audit"		=> {
+			assert_argc(args, &[0]);
+			sub::audit()
+		},
+
 		"passwd"	=> {
 			assert_argc(args, &[1, 2]);
 			sub::passwd(args)

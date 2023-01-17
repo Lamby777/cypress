@@ -17,6 +17,11 @@ pub fn init() {
 	}
 }
 
+pub fn audit() {
+	// Check for common security vulnerabilities
+	
+}
+
 pub fn passwd(args: &[String]) {
 	let em =	args.len()	== 2	&&
 					args[0]		== "em";

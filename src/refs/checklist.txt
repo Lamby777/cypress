@@ -1,0 +1,2 @@
+- Check for unauthorized files... Example:
+find / -name “*.mp3” –type f

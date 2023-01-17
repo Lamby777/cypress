@@ -1,8 +1,12 @@
 Pizza (CyPatrina V2) Commands List:
 
+`pz audit`
+- Check common mistakes that don't really require human work to detect (run this first!)
+
 `pz init`
 - Run initialization commands (installs and does easily reversible
 stuff that generally gives ~30 points in rounds 1 and 2)
+- DOES NOT WORK ON FEDORA! THIS IS MEANT FOR DEBIAN-BASED IMAGES
 
 `pz list`
 - List the users on this system, and their privileges
@@ -18,6 +22,3 @@ stuff that generally gives ~30 points in rounds 1 and 2)
 
 `pz refs`
 - Shows a guide for common tasks and commands for CyberPatriot
-
-`pz checklist`
-- Shows a summary checklist for Linux images
