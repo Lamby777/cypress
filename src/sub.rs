@@ -1,8 +1,10 @@
 // Subcommand stuff
 
+use std::borrow::Borrow;
+
 use users::get_current_uid;
 
-use crate::{bash, all_users, User};
+use crate::{bash, all_users, User, LINE_SEPARATOR};
 
 pub fn init() {
 	let res = bash!(include_str!("sh/init.sh"));
@@ -34,6 +36,35 @@ pub fn passwd(args: &[String]) {
 	} else {
 		println!("Passwords updated successfully!");
 	}
+}
+
+pub fn list_users() {
+	for_each_user(|user| {
+		println!("({}) {:?}", user.uid(), user.name());
+
+		true
+	}, None);
+}
+
+pub fn list_sudo_users() {
+	println!("The following users are in the 'wheel' or 'sudo' groups:\n{}", LINE_SEPARATOR);
+
+	for_each_user(|user| {
+		let groups = user.groups().unwrap();
+
+		let is_admin = groups.iter().any(|g| {
+			let group_name = g.name().to_string_lossy();
+			
+			// Debian uses "sudo" and Fedora uses "wheel"
+			matches!(group_name.borrow(), "sudo" | "wheel")
+		});
+		
+		if is_admin {
+			println!("({}) {:?}", user.uid(), user.name());
+		}
+
+		true // no errors
+	}, None);
 }
 
 // returns number of fails
