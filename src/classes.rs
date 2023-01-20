@@ -1,6 +1,6 @@
 // Permission stuff for files
 
-use std::path::{PathBuf, Path};
+use std::{path::{PathBuf, Path}, fmt};
 use bit_iter::BitIter;
 
 use crate::fs;
@@ -70,4 +70,17 @@ impl LinuxFile {
 	pub fn get_world_perms() -> RWX {
 		todo!()
 	}
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Removable {
+	Samba
+}
+
+impl fmt::Display for Removable {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Removable::Samba => write!(f, "Samba"),
+        }
+    }
 }

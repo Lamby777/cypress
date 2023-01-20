@@ -14,8 +14,8 @@ mod sub;
 mod classes;
 use classes::*;
 
-pub fn main(args: Vec<String>) {
-    if args.len() < 2 { return show_help(); }
+pub fn main(args: Vec<String>) -> Result<(), AnyError> {
+    if args.len() < 2 { return Ok(show_help()); }
 
     // --stolen-- BORROWED from yx code :D
 	let cmd = &args[1].to_lowercase();
@@ -28,6 +28,19 @@ pub fn main(args: Vec<String>) {
 			assert_argc(args, &[0]);
 			sub::init()
 		},
+
+		"rm"		=> {
+			assert_argc_gteq(args, 1);
+			
+			for target in args {
+				let lower = target.to_lowercase();
+
+				match lower.as_str() {
+					"samba"	=> bash!("apt-get remove .*smb.* .*samba.*")?,
+					_		=> todo!()
+				}
+			}
+		}
 
 		"audit"		=> {
 			assert_argc(args, &[0]);
@@ -92,6 +105,8 @@ pub fn main(args: Vec<String>) {
 
         _ => todo!()
     }
+
+	Ok(())
 }
 
 pub fn show_help() {
@@ -106,6 +121,14 @@ pub fn assert_argc(args: &[String], lens: &[usize]) {
 
 	if !lens.contains(&len) {
 		panic!("This subcommand requires {} arguments, but you only gave {}!", joined, len);
+	}
+}
+
+pub fn assert_argc_gteq(args: &[String], required: usize) {
+	let len = args.len();
+
+	if len < required {
+		panic!("This subcommand requires at least {} arguments, but you only gave {}!", required, len);
 	}
 }
 
