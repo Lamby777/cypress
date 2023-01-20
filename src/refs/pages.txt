@@ -1,0 +1,7 @@
+With this command, you can read up on commands that are
+somewhat more difficult to remember, and also view the
+checklist for the Linux images.
+
+apt		- Common `apt` and deb package commands
+dnf		- Common `dnf` and rpm package commands
+clist	- CyberPatriot Linux Hardening Checklist

@@ -1,4 +1,5 @@
 // Pass args stuff into lib.rs
-fn main() {
-	pizza::main(std::env::args().collect::<Vec<String>>());
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+	pz::main(std::env::args().collect::<Vec<String>>())
 }

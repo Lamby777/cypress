@@ -1,20 +1,65 @@
 // Subcommand stuff
 
-use std::borrow::Borrow;
-
+use std::{borrow::Borrow, path::Path};
 use users::get_current_uid;
+use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, IDFC};
 
-use crate::{bash, all_users, User, LINE_SEPARATOR};
+const LS_R_PATH: &str = "~/Desktop/homedir-recursive.txt";
 
-pub fn init() {
-	let res = bash!(include_str!("sh/init.sh"));
-	println!("\nCyPatrina init script complete!");
+pub fn init() -> IDFC<()> {
+	bash!(include_str!("sh/init.sh"))?;
 
-	if res.is_err() {
-		println!("Failed to complete CyPatrina init script...");
-	} else {
-		println!("Please ensure none of its changes caused you to lose points...");
-	}
+	println!("\nCyPatrina 1.1 init script complete!");
+	println!("Please ensure none of its changes caused you to lose points...");
+	Ok(())
+}
+
+pub fn audit() -> IDFC<()>  {
+	// Check for common security vulnerabilities
+
+	println!("Unauthorized files:");
+	bash!("sudo find /home -type f -iname \"*.mp3\"")?;
+	bash!("sudo find /home -type f -iname \"*.mp4\"")?;
+	bash!("sudo find /home -type f -iname \"*.wav\"")?;
+	bash!("sudo find /home -type f -iname \"*.tar.gz\"")?;
+	bash!("sudo find /home -type f -iname \"*.tgz\"")?;
+	bash!("sudo find /home -type f -iname \"*.zip\"")?;
+	bash!("sudo find /home -type f -iname \"*.deb\"")?;
+
+	println!("TIP: {} may reveal more sussy amogus files", LS_R_PATH);
+	// if rm fail, ignore error
+	let _ = bash!(format!("rm {}", LS_R_PATH));
+
+	// use find instead of ls -R to get actual paths
+	bash!(format!("sudo find /home -path '*/.*' -prune -o -print > {}", LS_R_PATH))?;
+
+	println!("\nWorld-writable files:");
+	bash!(r"sudo find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print")?;
+
+	println!("\nNo-user files:");
+	bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
+
+	// File Permission Checks
+	println!("\nChecking commonly tampered files' permissions...");
+
+	let perm_checks: Vec<(&str, RWXOctal)> = vec![
+		("/etc/passwd",		0b110100100),
+		("/etc/shadow",		0b110100100),
+	];
+
+	assert_file_perms("/etc/passwd", 0b110100100)?;
+
+	Ok(())
+}
+
+fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal) -> IDFC<()>  {
+	
+	// Permissions of the file should be AT MOST what is provided
+	let lf = LinuxFile::new(path);
+
+	println!("{:o}", lf.get_perms_octals()?);
+
+	Ok(())
 }
 
 pub fn passwd(args: &[String]) {

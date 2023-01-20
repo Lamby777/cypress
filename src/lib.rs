@@ -5,13 +5,17 @@
 
 use sh_inline::*;
 use users::*;
+use std::fs;
 
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
 
 mod sub;
 
-pub fn main(args: Vec<String>) {
-    if args.len() < 2 { return show_help(); }
+mod classes;
+use classes::*;
+
+pub fn main(args: Vec<String>) -> IDFC<()>  {
+    if args.len() < 2 { return Ok(show_help()); }
 
     // --stolen-- BORROWED from yx code :D
 	let cmd = &args[1].to_lowercase();
@@ -22,7 +26,25 @@ pub fn main(args: Vec<String>) {
 	match cmd {
 		"init"		=> {
 			assert_argc(args, &[0]);
-			sub::init()
+			sub::init()?
+		},
+
+		"rm"		=> {
+			assert_argc_gteq(args, 1);
+			
+			for target in args {
+				let lower = target.to_lowercase();
+
+				match lower.as_str() {
+					"samba"	=> bash!("apt-get remove .*smb.* .*samba.*")?,
+					_		=> todo!()
+				}
+			}
+		}
+
+		"audit"		=> {
+			assert_argc(args, &[0]);
+			sub::audit()?
 		},
 
 		"passwd"	=> {
@@ -58,19 +80,21 @@ pub fn main(args: Vec<String>) {
 				let page = &page.to_lowercase();
 
 				let page = match page.as_str() {
-					"guide"		=> "checklist",
+					"checklist" |
+					"guide"		=> "clist",
+
 					_			=> page
 				};
 
 				println!("Page: `{}`\n{}", page, LINE_SEPARATOR);
 
 				let out = match page {
-					"checklist" => include_str!("refs/checklist.txt"),
+					"clist"	=> include_str!("refs/checklist.txt"),
 
-					"apt"		=> include_str!("refs/apt.txt"),
-					"dnf"		=> include_str!("refs/dnf.txt"),
+					"apt"	=> include_str!("refs/apt.txt"),
+					"dnf"	=> include_str!("refs/dnf.txt"),
 
-					_			=> panic!("Not found!")
+					_		=> panic!("Not found!")
 				};
 
 				println!("{}", out);
@@ -81,6 +105,8 @@ pub fn main(args: Vec<String>) {
 
         _ => todo!()
     }
+
+	Ok(())
 }
 
 pub fn show_help() {
@@ -95,6 +121,14 @@ pub fn assert_argc(args: &[String], lens: &[usize]) {
 
 	if !lens.contains(&len) {
 		panic!("This subcommand requires {} arguments, but you only gave {}!", joined, len);
+	}
+}
+
+pub fn assert_argc_gteq(args: &[String], required: usize) {
+	let len = args.len();
+
+	if len < required {
+		panic!("This subcommand requires at least {} arguments, but you only gave {}!", required, len);
 	}
 }
 
