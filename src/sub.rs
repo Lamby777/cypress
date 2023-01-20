@@ -39,7 +39,14 @@ pub fn audit() -> IDFC<()>  {
 	println!("\nNo-user files:");
 	bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
 
+	// File Permission Checks
 	println!("\nChecking commonly tampered files' permissions...");
+
+	let perm_checks: Vec<(&str, RWXOctal)> = vec![
+		("/etc/passwd",		0b110100100),
+		("/etc/shadow",		0b110100100),
+	];
+
 	assert_file_perms("/etc/passwd", 0b110100100)?;
 
 	Ok(())
