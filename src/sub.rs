@@ -1,10 +1,10 @@
 // Subcommand stuff
 
-use std::borrow::Borrow;
+use std::{borrow::Borrow, path::Path};
 
 use users::get_current_uid;
 
-use crate::{bash, all_users, User, LINE_SEPARATOR};
+use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, AnyError};
 
 pub fn init() {
 	let res = bash!(include_str!("sh/init.sh"));
@@ -19,7 +19,18 @@ pub fn init() {
 
 pub fn audit() {
 	// Check for common security vulnerabilities
+	assert_file_perms("/etc/passwd", 0b110100100);
+}
+
+fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal)
+	-> Result<(), AnyError> {
 	
+	// Permissions of the file should be AT MOST what is provided
+	let lf = LinuxFile::new(path);
+
+	println!("{:o}", lf.get_perms_octals()?);
+
+	Ok(())
 }
 
 pub fn passwd(args: &[String]) {

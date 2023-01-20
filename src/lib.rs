@@ -5,10 +5,14 @@
 
 use sh_inline::*;
 use users::*;
+use std::fs;
 
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
 
 mod sub;
+
+mod classes;
+use classes::*;
 
 pub fn main(args: Vec<String>) {
     if args.len() < 2 { return show_help(); }
