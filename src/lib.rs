@@ -26,7 +26,7 @@ pub fn main(args: Vec<String>) -> Result<(), AnyError> {
 	match cmd {
 		"init"		=> {
 			assert_argc(args, &[0]);
-			sub::init()
+			sub::init()?
 		},
 
 		"rm"		=> {
@@ -44,7 +44,7 @@ pub fn main(args: Vec<String>) -> Result<(), AnyError> {
 
 		"audit"		=> {
 			assert_argc(args, &[0]);
-			sub::audit()
+			sub::audit()?
 		},
 
 		"passwd"	=> {

@@ -6,20 +6,26 @@ use users::get_current_uid;
 
 use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, AnyError};
 
-pub fn init() {
-	let res = bash!(include_str!("sh/init.sh"));
-	println!("\nCyPatrina init script complete!");
+pub fn init() -> Result<(), AnyError> {
+	let res = bash!(include_str!("sh/init.sh"))?;
 
-	if res.is_err() {
-		println!("Failed to complete CyPatrina init script...");
-	} else {
-		println!("Please ensure none of its changes caused you to lose points...");
-	}
+	println!("\nCyPatrina 1.1 init script complete!");
+	println!("Please ensure none of its changes caused you to lose points...");
+	Ok(())
 }
 
-pub fn audit() {
+pub fn audit() -> Result<(), AnyError> {
 	// Check for common security vulnerabilities
-	assert_file_perms("/etc/passwd", 0b110100100);
+
+	println!("World-writable files:");
+	bash!(r"sudo find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print")?;
+
+	println!("No-user files:");
+	bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
+
+	assert_file_perms("/etc/passwd", 0b110100100)?;
+
+	Ok(())
 }
 
 fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal)

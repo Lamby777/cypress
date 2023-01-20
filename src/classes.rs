@@ -71,16 +71,3 @@ impl LinuxFile {
 		todo!()
 	}
 }
-
-#[derive(Debug, Clone, Copy)]
-pub enum Removable {
-	Samba
-}
-
-impl fmt::Display for Removable {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Removable::Samba => write!(f, "Samba"),
-        }
-    }
-}
