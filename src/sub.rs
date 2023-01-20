@@ -21,6 +21,10 @@ pub fn audit() -> IDFC<()>  {
 	bash!("sudo find /home -type f -iname \"*.mp3\"")?;
 	bash!("sudo find /home -type f -iname \"*.mp4\"")?;
 	bash!("sudo find /home -type f -iname \"*.wav\"")?;
+	bash!("sudo find /home -type f -iname \"*.tar.gz\"")?;
+	bash!("sudo find /home -type f -iname \"*.tgz\"")?;
+	bash!("sudo find /home -type f -iname \"*.zip\"")?;
+	bash!("sudo find /home -type f -iname \"*.deb\"")?;
 
 	println!("TIP: {} may reveal more sussy amogus files", LS_R_PATH);
 	// if rm fail, ignore error
