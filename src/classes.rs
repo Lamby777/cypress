@@ -1,13 +1,17 @@
 // Permission stuff for files
 
-use std::{path::{PathBuf, Path}, fmt};
+use std::{path::{PathBuf, Path}};
 use bit_iter::BitIter;
 
 use crate::fs;
 use std::os::unix::fs::PermissionsExt;
 
-pub type RWXOctal = u32;
-pub type AnyError = Box<dyn std::error::Error>;
+pub type RWXOctal	= u32;
+pub type AnyError	= Box<dyn std::error::Error>;
+
+// Ah, yes, the very useful "I Don't Freakin' Care what the error is!" type.
+// Just let me return a Result like an Option where None indicates errors! :(
+pub type IDFC<T>	= Result<T, AnyError>;
 
 pub struct RWX {
 	read:		bool,
@@ -43,14 +47,14 @@ impl LinuxFile {
 		*/
 	}
 
-	pub fn get_perms_octals(&self) -> Result<RWXOctal, AnyError> {
+	pub fn get_perms_octals(&self) -> IDFC<RWXOctal> {
 		let file = fs::File::open(&self.path)?;
 
 		let metadata = file.metadata()?;
 		Ok(metadata.permissions().mode())
 	}
 
-	pub fn get_perms_bits(&self) -> Result<BitIter<u32>, AnyError> {
+	pub fn get_perms_bits(&self) -> IDFC<BitIter<u32>> {
 		let rwxo = self.get_perms_octals();
 		let rwxo = rwxo.expect("Error reading permissions");
 

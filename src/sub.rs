@@ -4,17 +4,17 @@ use std::{borrow::Borrow, path::Path};
 
 use users::get_current_uid;
 
-use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, AnyError};
+use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, IDFC};
 
-pub fn init() -> Result<(), AnyError> {
-	let res = bash!(include_str!("sh/init.sh"))?;
+pub fn init() -> IDFC<()> {
+	bash!(include_str!("sh/init.sh"))?;
 
 	println!("\nCyPatrina 1.1 init script complete!");
 	println!("Please ensure none of its changes caused you to lose points...");
 	Ok(())
 }
 
-pub fn audit() -> Result<(), AnyError> {
+pub fn audit() -> IDFC<()>  {
 	// Check for common security vulnerabilities
 
 	println!("World-writable files:");
@@ -28,8 +28,7 @@ pub fn audit() -> Result<(), AnyError> {
 	Ok(())
 }
 
-fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal)
-	-> Result<(), AnyError> {
+fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal) -> IDFC<()>  {
 	
 	// Permissions of the file should be AT MOST what is provided
 	let lf = LinuxFile::new(path);

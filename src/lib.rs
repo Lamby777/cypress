@@ -14,7 +14,7 @@ mod sub;
 mod classes;
 use classes::*;
 
-pub fn main(args: Vec<String>) -> Result<(), AnyError> {
+pub fn main(args: Vec<String>) -> IDFC<()>  {
     if args.len() < 2 { return Ok(show_help()); }
 
     // --stolen-- BORROWED from yx code :D
