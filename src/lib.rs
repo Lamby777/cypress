@@ -6,6 +6,7 @@
 use sh_inline::*;
 use users::*;
 use std::fs;
+use indoc::{indoc, printdoc};
 
 const LINE_SEPARATOR: &str	= "--------------------------------------------------";
 
@@ -30,14 +31,57 @@ pub fn main(args: Vec<String>) -> IDFC<()>  {
 		},
 
 		"rm"		=> {
-			assert_argc_gteq(args, 1);
+			if args.len() < 1 {
+				println!(indoc! {"
+					{}
+					Batch-remove packages of \"hacking tools.\"
+					Usage: `pz rm <category>`
+					{}
+
+					Categories:
+					samba
+					webserver
+					packets
+					cracking
+					torrent
+				"}, LINE_SEPARATOR, LINE_SEPARATOR);
+
+				return Ok(())
+			}
 			
 			for target in args {
 				let lower = target.to_lowercase();
 
 				match lower.as_str() {
-					"samba"	=> bash!("apt-get remove .*smb.* .*samba.*")?,
-					_		=> todo!()
+					"samba"		=> {
+						bash!("sudo apt-get remove .*smb.* .*samba.*")?
+					},
+
+					"webserver"	=> {
+						bash!("sudo apt-get remove lighttpd nginx .*apache.*")?
+					},
+
+					"packets"	=> {
+						bash!("sudo apt-get remove \
+wireshark tcpdump netcat-traditional .*nmap.* nikto")?
+					},
+
+					"cracking"	=> {
+						bash!("sudo apt-get remove \
+ophcrack hashcat john hydra.* aircrack.*")?
+					},
+
+					"torrent"	=> {
+						bash!("sudo apt-get remove \
+deluge.* ktorrent kget qbittorrent rtorrent unworkable")?;
+
+						printdoc! {"
+							Consider removing `transmission` as well...
+							(never tried it, but it might give points)
+						"};
+					},
+
+					_			=> todo!()
 				}
 			}
 		}

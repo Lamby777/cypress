@@ -32,12 +32,13 @@ awk NF
 - Add this stuff to sshd_config:
 PermitRootLogin no
 ChallengeResponseAuthentication no
-PasswordAuthentication no
 UsePAM no
 PermitEmptyPasswords no
 ClientAliveInterval 300
 ClientAliveCountMax 0
 IgnoreRhosts yes
+LoginGraceTime 60
+UsePrivilegeSeparation yes
 
 - Check logs:
 /var/log/boot
@@ -48,6 +49,37 @@ IgnoreRhosts yes
 
 - Check for sussy amogus services:
 service --status-all
+cat /etc/init
 ls /etc/init.d/
 
 - Check crontab for sussy amogus cron jobs
+
+- Enable Auto-Updates
+
+- Edit /etc/lightdm/lightdm.conf OR on Ubuntu:
+/usr/share/lightdm/lightdm.conf/50-ubuntu.conf
+allow-guest=false
+greeter-hide-users=true
+greeter-show-manual-login=true
+autologin-user=none
+
+- Make sure your RCs don't contain sussy amogus commands. Common stuff:
+/etc/bash.bashrc
+/etc/profile.d/
+/etc/profile
+~/.bash_profile
+~/.bash_login
+~/.profile
+~/.bashrc
+
+- Check for duplicate UIDs in /etc/passwd and the other 3 files
+Using `pwck` will help, but not all of its errors
+are necessarily security vulnerabilities.
+
+- If FTP is required, update /etc/vsftpd.conf:
+anonymous_enable=ON
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+
+- Check /etc/hosts and /etc/resolv.conf for sussy DNS overrides

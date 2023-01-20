@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 bit-iter = "1.1.1"
+indoc = "1.0.8"
 sh-inline = "0.4.0"
 users = "0.11.0"
