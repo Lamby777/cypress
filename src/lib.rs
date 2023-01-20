@@ -43,6 +43,7 @@ pub fn main(args: Vec<String>) -> IDFC<()>  {
 					webserver
 					packets
 					cracking
+					torrent
 				"}, LINE_SEPARATOR, LINE_SEPARATOR);
 
 				return Ok(())
