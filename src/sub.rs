@@ -30,7 +30,7 @@ pub fn audit() -> IDFC<()>  {
 	// if rm fail, ignore error
 	let _ = bash!(format!("rm {}", LS_R_PATH));
 
-	// ls -R, filter the spammy empty lines for a quick overview
+	// use find instead of ls -R to get actual paths
 	bash!(format!("sudo find /home -path '*/.*' -prune -o -print > {}", LS_R_PATH))?;
 
 	println!("\nWorld-writable files:");
