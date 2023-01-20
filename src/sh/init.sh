@@ -3,6 +3,11 @@
 # CyPatrina 1.1
 # Deep-Fried Tables
 
+sudo chmod 640 /etc/passwd
+sudo chmod 640 /etc/shadow
+sudo chmod 640 /etc/group
+sudo chmod 640 /etc/gshadow
+
 # Update all packages
 sudo apt update
 sudo apt -y upgrade

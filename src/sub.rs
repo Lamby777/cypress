@@ -42,6 +42,7 @@ pub fn audit() -> IDFC<()>  {
 	// File Permission Checks
 	println!("\nChecking commonly tampered files' permissions...");
 
+	println!("<stuff after this line is just for debugging>");
 	let perm_checks: Vec<(&str, RWXOctal)> = vec![
 		("/etc/passwd",		0b110100100),
 		("/etc/shadow",		0b110100100),
