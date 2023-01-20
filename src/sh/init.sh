@@ -14,8 +14,8 @@ sudo apt -y install python3 ufw gufw aptitude mlocate bum
 sudo apt -y install fail2ban
 sudo apt -y install libpam-cracklib
 
-sudo apt -y install clamtk
-freshclam
+sudo apt-get -y install auditd && auditctl -e 1
+sudo apt-get -y install clamtk && freshclam
 
 # Lock Root Account
 sudo passwd -l root
