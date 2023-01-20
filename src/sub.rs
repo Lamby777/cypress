@@ -1,10 +1,10 @@
 // Subcommand stuff
 
 use std::{borrow::Borrow, path::Path};
-
 use users::get_current_uid;
-
 use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, IDFC};
+
+const LS_R_PATH: &str = "~/Desktop/homedir-recursive.txt";
 
 pub fn init() -> IDFC<()> {
 	bash!(include_str!("sh/init.sh"))?;
@@ -17,12 +17,25 @@ pub fn init() -> IDFC<()> {
 pub fn audit() -> IDFC<()>  {
 	// Check for common security vulnerabilities
 
-	println!("World-writable files:");
+	println!("Unauthorized files:");
+	bash!("sudo find /home -type f -iname \"*.mp3\"")?;
+	bash!("sudo find /home -type f -iname \"*.mp4\"")?;
+	bash!("sudo find /home -type f -iname \"*.wav\"")?;
+
+	println!("TIP: {} may reveal more sussy amogus files", LS_R_PATH);
+	// if rm fail, ignore error
+	let _ = bash!(format!("rm {}", LS_R_PATH));
+
+	// ls -R, filter the spammy empty lines for a quick overview
+	bash!(format!("sudo find /home -path '*/.*' -prune -o -print > {}", LS_R_PATH))?;
+
+	println!("\nWorld-writable files:");
 	bash!(r"sudo find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print")?;
 
-	println!("No-user files:");
+	println!("\nNo-user files:");
 	bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
 
+	println!("\nChecking commonly tampered files' permissions...");
 	assert_file_perms("/etc/passwd", 0b110100100)?;
 
 	Ok(())

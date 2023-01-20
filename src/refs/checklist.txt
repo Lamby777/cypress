@@ -1,2 +1,5 @@
 - Check for unauthorized files... Example:
-find / -name “*.mp3” –type f
+find /home -name “*.mp3” –type f
+
+- Remove empty lines from output (pipe into this):
+awk NF
