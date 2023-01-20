@@ -1,4 +1,7 @@
-# CyPatrina 1.0 init script, probably gonna add more stuff soon
+#!/bin/bash
+
+# CyPatrina 1.1
+# Deep-Fried Tables
 
 # Update all packages
 sudo apt update
@@ -8,8 +11,10 @@ sudo apt -y upgrade
 sudo apt -y install python3 ufw gufw aptitude mlocate
 
 # These are on separate lines to be easily commented out
-sudo apt install fail2ban
-sudo apt install libpam-cracklib
+sudo apt -y install fail2ban
+sudo apt -y install libpam-cracklib
 
-sudo apt install clamtk
+sudo apt -y install clamtk
 freshclam
+
+sudo passwd -l root
