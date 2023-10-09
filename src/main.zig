@@ -42,7 +42,7 @@ pub fn main() !void {
     while (true) {
         try drawWin(&win);
 
-        const cmdEntered = try getCmd(&ally, &win);
+        const cmdEntered = try getCmd(&win);
         _ = cmdEntered;
     }
 
@@ -58,12 +58,7 @@ fn drawWin(win: *const curses.Window) !void {
     try win.boxme();
 }
 
-fn intToStr(ally: *Allocator, i: i32) ![]const u8 {
-    return fmt.allocPrint(ally.*, "{d}", .{i});
-}
-
-fn getCmd(ally: *Allocator, win: *const curses.Window) !CommandBuffer {
-    _ = ally;
+fn getCmd(win: *const curses.Window) !CommandBuffer {
     var cursorPos: u16 = 0;
     var cmd: CommandBuffer = undefined;
 
