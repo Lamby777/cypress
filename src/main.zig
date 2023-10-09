@@ -27,9 +27,6 @@ fn drawWin() !void {
     try win.mvaddstr(TOP_LINENO + 1, 2, "q to quit");
     try win.mvaddstr(TOP_LINENO + 2, 2, "-----------");
     try win.boxme();
-
-    // i have no idea why this needs a +1, but it does
-    try win.mvaddch(CMD_LINENO + 1, 2, CMD_PROMPT);
 }
 
 pub fn main() !void {
@@ -53,16 +50,18 @@ pub fn main() !void {
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
 
     while (true) {
-        const cmdEntered = try getCmd();
+        const cmdEntered = try getCmd(0);
         _ = cmdEntered;
+        // processCmd(cmdEntered);
     }
 
     _ = try curses.endwin();
 }
 
-fn getCmd() !CommandBuffer {
+fn getCmd(lineOffset: u8) !CommandBuffer {
     var cursorPos: u16 = 0;
     var cmd: CommandBuffer = undefined;
+    var lineno = CMD_LINENO + lineOffset;
 
     // we don't need to worry about arrow keys and stuff...
     // this "shell" is gonna be dead simple. the commands
@@ -72,8 +71,9 @@ fn getCmd() !CommandBuffer {
     while (true) {
         // write cmd buffer to prompt
         try drawWin();
-        try win.mvaddstr(CMD_LINENO, 4, cmd[0..cursorPos]);
-        try curses.move(CMD_LINENO, 4 + cursorPos);
+        try win.mvaddch(lineno + 1, 2, CMD_PROMPT);
+        try win.mvaddstr(lineno, 4, cmd[0..cursorPos]);
+        try curses.move(lineno, 4 + cursorPos);
 
         const key = try win.getch();
         const ch: u32 = @intCast(key);
