@@ -28,6 +28,9 @@ pub fn main() !void {
     // Initialize the curses library
     const win = try curses.initscr(ally);
     try curses.start_color(); // Enable color support
+    try curses.cbreak();
+    try curses.noecho();
+    _ = try curses.curs_set(0);
 
     // Define color pairs
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
@@ -56,6 +59,7 @@ fn intToStr(ally: *Allocator, i: i32) ![]const u8 {
 }
 
 fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
+    _ = ally;
     var cursorPos: u16 = 0;
     var cmd: [CMD_BUFFER_SIZE]u8 = undefined;
 
@@ -68,21 +72,21 @@ fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
         const key = try win.getch();
         const ch: u32 = @intCast(key);
 
+        try drawWin(win);
         switch (key) {
             // user pressed backspace
             BACKSPACE_CH => {
                 try win.mvaddch(40, cursorPos, 'a');
-                cursorPos -= 1;
-                if (cursorPos < 0) {
-                    cursorPos = 0;
+                if (cursorPos > 0) {
+                    cursorPos -= 1;
                 }
             },
 
             // user typed a character
             // you can't be serious...
             0...ENTER_CH - 1, ENTER_CH + 1...BACKSPACE_CH - 1, BACKSPACE_CH + 1...255 => {
-                try win.mvaddstr(18, 3, "   ");
-                try win.mvaddstr(18, 3, try intToStr(ally, key));
+                // try win.mvaddstr(18, 3, "   ");
+                // try win.mvaddstr(18, 3, try intToStr(ally, key));
                 cmd[cursorPos] = @intCast(ch);
                 cursorPos += 1;
             },
@@ -92,6 +96,6 @@ fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
         }
 
         // write cmd buffer to prompt
-        try win.mvaddstr(20, 3, &cmd);
+        try win.mvaddstr(20, 3, cmd[0..cursorPos]);
     }
 }

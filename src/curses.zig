@@ -86,6 +86,14 @@ pub fn initscr(allocator: std.mem.Allocator) !Window {
     return Window{ .win = res, .allocator = allocator };
 }
 
+pub fn noecho() !void {
+    _ = try checkError(c.noecho());
+}
+
+pub fn cbreak() !void {
+    _ = try checkError(c.cbreak());
+}
+
 pub fn endwin() !void {
     _ = try checkError(c.endwin());
 }
