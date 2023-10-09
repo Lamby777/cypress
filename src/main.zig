@@ -50,7 +50,7 @@ fn intToStr(ally: *Allocator, i: i32) ![]const u8 {
 
 fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
     var cursorPos: u16 = 0;
-    var cmd: [CMD_BUFFER_SIZE]u32 = undefined;
+    var cmd: [CMD_BUFFER_SIZE]u8 = undefined;
 
     // we don't need to worry about arrow keys and stuff...
     // this "shell" is gonna be dead-simple. the commands
@@ -71,13 +71,21 @@ fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
                 }
             },
 
-            else => {
+            // you can't be serious...
+            0...BACKSPACE_CH - 1, BACKSPACE_CH + 1...255 => {
                 // user typed a character
                 try win.mvaddch(20, cursorPos, ch);
                 try win.mvaddstr(21, 3, try intToStr(ally, key));
-                cmd[cursorPos] = ch;
+                cmd[cursorPos] = @intCast(ch);
                 cursorPos += 1;
             },
+
+            else => {
+                // bruh
+            },
         }
+
+        // write cmd buffer to prompt
+        try win.mvaddstr(20, 3, &cmd);
     }
 }
