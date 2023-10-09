@@ -5,6 +5,12 @@ const fmt = std.fmt;
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
+// the useful constants that might need to be changed
+const CMD_BUFFER_SIZE = 1024;
+
+// the "ignore this magic number" constants
+const BACKSPACE_CH = 127;
+
 pub fn main() !void {
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     defer {
@@ -43,19 +49,35 @@ fn intToStr(ally: *Allocator, i: i32) ![]const u8 {
 }
 
 fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
-    var cursorPos: u8 = 0;
-    var cmd: [1024]u8 = undefined;
-    _ = cmd;
+    var cursorPos: u16 = 0;
+    var cmd: [CMD_BUFFER_SIZE]u32 = undefined;
+
+    // we don't need to worry about arrow keys and stuff...
+    // this "shell" is gonna be dead-simple. the commands
+    // aren't gonna be long enough that backspacing and
+    // typing over the old character will take much time.
 
     while (true) {
         const key = try win.getch();
+        const ch: u32 = @intCast(key);
 
-        if (key == 127) {
-            try win.mvaddch(40, cursorPos, 'a');
+        switch (key) {
+            BACKSPACE_CH => {
+                // user pressed backspace
+                try win.mvaddch(40, cursorPos, 'a');
+                cursorPos -= 1;
+                if (cursorPos < 0) {
+                    cursorPos = 0;
+                }
+            },
+
+            else => {
+                // user typed a character
+                try win.mvaddch(20, cursorPos, ch);
+                try win.mvaddstr(21, 3, try intToStr(ally, key));
+                cmd[cursorPos] = ch;
+                cursorPos += 1;
+            },
         }
-
-        try win.mvaddch(20, cursorPos, @intCast(key));
-        try win.mvaddstr(21, 3, try intToStr(ally, key));
-        cursorPos += 1;
     }
 }
