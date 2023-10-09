@@ -1,24 +1,95 @@
+// Katz, a command-line chat client for
+// the Sparklet Katz protocol
+// --- by &Cherry and III_zP0_III (npxTSC)
+//
+// Used this repo for Zig ncurses boilerplate:
+// https://github.com/Akuli/curses-minesweeper
+// <3 Open Source
+
 const std = @import("std");
+const curses = @import("curses.zig");
+const heap = std.heap;
+const fmt = std.fmt;
+
+// yes, this is how we're doing it til I find a single
+// piece of documentation about build.zig.zon files.
+//
+// shut up, it's not a code smell, YOU'RE a code smell ;-;
+const VERSION = [3]u8{ 0, 1, 0 };
+const VERSION_STR = fmt.comptimePrint("{}.{}.{}", .{
+    VERSION[0],
+    VERSION[1],
+    VERSION[2],
+});
+
+// info for default ws server (users can host their own)
+const SRV_ADDR = "127.0.0.1";
+const SRV_PORT = 9098; // so serious :3
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var gpa = heap.GeneralPurposeAllocator(.{}){};
+    defer {
+        const st = gpa.deinit();
+        if (st == .leak) {
+            std.debug.print("leaked (bruh)", .{});
+        }
+    }
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    const ally = gpa.allocator();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    // Initialize the curses library
+    const win = try curses.initscr(ally);
+    try curses.start_color(); // Enable color support
 
-    try bw.flush(); // don't forget to flush!
+    // Define color pairs
+    const pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
+
+    while (true) {
+        // Print some text
+        try win.attron(pair1.attr());
+
+        try win.mvaddstr(1, 2, fmt.comptimePrint("katz v{s}", .{VERSION_STR}));
+        try win.mvaddstr(4, 2, "q to quit");
+        try win.boxme();
+
+        switch (try win.getch()) {
+            'i' => {
+                try enterMode(.input, &win);
+            },
+
+            'q' => {
+                break;
+            },
+
+            else => {},
+        }
+    }
+
+    _ = try curses.endwin(); // End curses mode
 }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+const MODES = enum {
+    input,
+};
+
+fn enterMode(mode: MODES, win: *const curses.Window) !void {
+    var cursorPos: u8 = 0;
+
+    while (true) {
+        switch (mode) {
+            .input => {
+                switch (try win.getch()) {
+                    127 => {
+                        // TODO doesn't detect esc, fix later
+                        break;
+                    },
+
+                    else => |key| {
+                        try win.mvaddch(20, cursorPos, @intCast(key));
+                        cursorPos += 1;
+                    },
+                }
+            },
+        }
+    }
 }
