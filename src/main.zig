@@ -1,9 +1,22 @@
+/////////////////////////////////////
+//          Cypress v1.2           //
+//  A simple interactive shell for //
+//   auditing CyberPatriot images  //
+//                                 //
+//       - &Cherry, 8/9/2023       //
+/////////////////////////////////////
+
+// imports
 const std = @import("std");
 const curses = @import("curses.zig");
+const shell = @import("shell.zig");
+
+// import aliases
 const heap = std.heap;
 const fmt = std.fmt;
 const mem = std.mem;
 const Allocator = mem.Allocator;
+const processCmd = shell.processCmd;
 
 // the useful constants that might need to be changed
 const CMD_BUFFER_SIZE = 64;
@@ -67,8 +80,7 @@ pub fn main() !void {
 
     while (true) {
         const cmdEntered = try getCmd(&ally, 0);
-        _ = cmdEntered;
-        // processCmd(cmdEntered);
+        processCmd(cmdEntered);
     }
 
     _ = try curses.endwin();
