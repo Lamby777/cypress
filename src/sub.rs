@@ -1,144 +1,161 @@
 // Subcommand stuff
 
+use crate::{all_users, bash, LinuxFile, RWXOctal, User, IDFC, LINE_SEPARATOR};
 use std::{borrow::Borrow, path::Path};
 use users::get_current_uid;
-use crate::{bash, all_users, User, LINE_SEPARATOR, RWXOctal, LinuxFile, IDFC};
 
 const LS_R_PATH: &str = "~/Desktop/homedir-recursive.txt";
 
 pub fn init() -> IDFC<()> {
-	bash!(include_str!("sh/init.sh"))?;
+    bash!(include_str!("sh/init.sh"))?;
 
-	println!("\nCyPatrina 1.1 init script complete!");
-	println!("Please ensure none of its changes caused you to lose points...");
-	Ok(())
+    println!("\nCyPatrina 1.1 init script complete!");
+    println!("Please ensure none of its changes caused you to lose points...");
+    Ok(())
 }
 
-pub fn audit() -> IDFC<()>  {
-	// Check for common security vulnerabilities
+pub fn audit() -> IDFC<()> {
+    // Check for common security vulnerabilities
 
-	println!("Unauthorized files:");
-	bash!("sudo find /home -type f -iname \"*.mp3\"")?;
-	bash!("sudo find /home -type f -iname \"*.mp4\"")?;
-	bash!("sudo find /home -type f -iname \"*.wav\"")?;
-	bash!("sudo find /home -type f -iname \"*.tar.gz\"")?;
-	bash!("sudo find /home -type f -iname \"*.tgz\"")?;
-	bash!("sudo find /home -type f -iname \"*.zip\"")?;
-	bash!("sudo find /home -type f -iname \"*.deb\"")?;
+    println!("Unauthorized files:");
+    bash!("sudo find /home -type f -iname \"*.mp3\"")?;
+    bash!("sudo find /home -type f -iname \"*.mp4\"")?;
+    bash!("sudo find /home -type f -iname \"*.wav\"")?;
+    bash!("sudo find /home -type f -iname \"*.tar.gz\"")?;
+    bash!("sudo find /home -type f -iname \"*.tgz\"")?;
+    bash!("sudo find /home -type f -iname \"*.zip\"")?;
+    bash!("sudo find /home -type f -iname \"*.deb\"")?;
 
-	println!("TIP: {} may reveal more sussy amogus files", LS_R_PATH);
-	// if rm fail, ignore error
-	let _ = bash!(format!("rm {}", LS_R_PATH));
+    println!("TIP: {} may reveal more sussy amogus files", LS_R_PATH);
+    // if rm fail, ignore error
+    let _ = bash!(format!("rm {}", LS_R_PATH));
 
-	// use find instead of ls -R to get actual paths
-	bash!(format!("sudo find /home -path '*/.*' -prune -o -print > {}", LS_R_PATH))?;
+    // use find instead of ls -R to get actual paths
+    bash!(format!(
+        "sudo find /home -path '*/.*' -prune -o -print > {}",
+        LS_R_PATH
+    ))?;
 
-	println!("\nWorld-writable files:");
-	bash!(r"sudo find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print")?;
+    println!("\nWorld-writable files:");
+    bash!(r"sudo find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print")?;
 
-	println!("\nNo-user files:");
-	bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
+    println!("\nNo-user files:");
+    bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
 
-	// File Permission Checks
-	println!("\nChecking commonly tampered files' permissions...");
+    // File Permission Checks
+    println!("\nChecking commonly tampered files' permissions...");
 
-	println!("<stuff after this line is just for debugging>");
-	let perm_checks: Vec<(&str, RWXOctal)> = vec![
-		("/etc/passwd",		0b110100100),
-		("/etc/shadow",		0b110100100),
-	];
+    println!("<stuff after this line is just for debugging>");
+    let perm_checks: Vec<(&str, RWXOctal)> =
+        vec![("/etc/passwd", 0b110100100), ("/etc/shadow", 0b110100100)];
 
-	assert_file_perms("/etc/passwd", 0b110100100)?;
+    assert_file_perms("/etc/passwd", 0b110100100)?;
 
-	Ok(())
+    Ok(())
 }
 
-fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal) -> IDFC<()>  {
-	
-	// Permissions of the file should be AT MOST what is provided
-	let lf = LinuxFile::new(path);
+fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal) -> IDFC<()> {
+    // Permissions of the file should be AT MOST what is provided
+    let lf = LinuxFile::new(path);
 
-	println!("{:o}", lf.get_perms_octals()?);
+    println!("{:o}", lf.get_perms_octals()?);
 
-	Ok(())
+    Ok(())
 }
 
 pub fn passwd(args: &[String]) {
-	let em =	args.len()	== 2	&&
-					args[0]		== "em";
-	
-	let new_pass = args.last().unwrap();
+    let em = args.len() == 2 && args[0] == "em";
 
-	let errors = for_each_user(|user| {
-		let name = user.name().to_string_lossy();
+    let new_pass = args.last().unwrap();
 
-		let cmd = format!("sudo passwd {} <<< \"{}\"$'\n'\"{}\"", name, new_pass, new_pass);
+    let errors = for_each_user(
+        |user| {
+            let name = user.name().to_string_lossy();
 
-		bash!(cmd).is_ok()
-	}, if em { Some(get_current_uid()) } else { None } );
+            let cmd = format!(
+                "sudo passwd {} <<< \"{}\"$'\n'\"{}\"",
+                name, new_pass, new_pass
+            );
 
-	if errors > 0 {
-		println!("{} passwords had issues being updated...", errors);
-	} else {
-		println!("Passwords updated successfully!");
-	}
+            bash!(cmd).is_ok()
+        },
+        if em { Some(get_current_uid()) } else { None },
+    );
+
+    if errors > 0 {
+        println!("{} passwords had issues being updated...", errors);
+    } else {
+        println!("Passwords updated successfully!");
+    }
 }
 
 pub fn list_users() {
-	for_each_user(|user| {
-		println!("({}) {:?}", user.uid(), user.name());
+    for_each_user(
+        |user| {
+            println!("({}) {:?}", user.uid(), user.name());
 
-		true
-	}, None);
+            true
+        },
+        None,
+    );
 }
 
 pub fn list_sudo_users() {
-	println!("The following users are in the 'wheel' or 'sudo' groups:\n{}", LINE_SEPARATOR);
+    println!(
+        "The following users are in the 'wheel' or 'sudo' groups:\n{}",
+        LINE_SEPARATOR
+    );
 
-	for_each_user(|user| {
-		let groups = user.groups().unwrap();
+    for_each_user(
+        |user| {
+            let groups = user.groups().unwrap();
 
-		let is_admin = groups.iter().any(|g| {
-			let group_name = g.name().to_string_lossy();
-			
-			// Debian uses "sudo" and Fedora uses "wheel"
-			matches!(group_name.borrow(), "sudo" | "wheel")
-		});
-		
-		if is_admin {
-			println!("({}) {:?}", user.uid(), user.name());
-		}
+            let is_admin = groups.iter().any(|g| {
+                let group_name = g.name().to_string_lossy();
 
-		true // no errors
-	}, None);
+                // Debian uses "sudo" and Fedora uses "wheel"
+                matches!(group_name.borrow(), "sudo" | "wheel")
+            });
+
+            if is_admin {
+                println!("({}) {:?}", user.uid(), user.name());
+            }
+
+            true // no errors
+        },
+        None,
+    );
 }
 
 // returns number of fails
 fn for_each_user<C>(action: C, except: Option<u32>) -> u16
-	where C: Fn(User) -> bool {
+where
+    C: Fn(User) -> bool,
+{
+    let users = all_account_users();
+    let excepting = except.is_some();
 
-	let users = all_account_users();
-	let excepting = except.is_some();
+    // don't make this call if there isn't a point anyway
+    let current_uid = if excepting { get_current_uid() } else { 0 };
 
-	// don't make this call if there isn't a point anyway
-	let current_uid = if excepting { get_current_uid() } else { 0 };
+    let mut errors = 0;
 
-	let mut errors = 0;
+    for user in users {
+        if excepting && (user.uid() == current_uid) {
+            continue;
+        };
 
-	for user in users {
-		if excepting && (user.uid() == current_uid) { continue };
+        if !action(user) {
+            errors += 1;
+        }
+    }
 
-		if !action(user) {
-			errors += 1;
-		}
-	}
-
-	errors
+    errors
 }
 
 fn all_account_users() -> impl Iterator<Item = User> {
-	(unsafe { all_users() }).filter(|user| {
-		user.uid() >= 1000 &&	// system users
-		user.uid() != 65534		// nobody
-	})
+    (unsafe { all_users() }).filter(|user| {
+        user.uid() >= 1000 &&	// system users
+		user.uid() != 65534 // nobody
+    })
 }

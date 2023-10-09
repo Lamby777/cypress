@@ -3,36 +3,39 @@
 * https://github.com/Lamby777/yx
 */
 
-use sh_inline::*;
-use users::*;
-use std::fs;
 use indoc::{indoc, printdoc};
+use sh_inline::*;
+use std::fs;
+use users::*;
 
-const LINE_SEPARATOR: &str	= "--------------------------------------------------";
+const LINE_SEPARATOR: &str = "--------------------------------------------------";
 
 mod sub;
 
 mod classes;
 use classes::*;
 
-pub fn main(args: Vec<String>) -> IDFC<()>  {
-    if args.len() < 2 { return Ok(show_help()); }
+pub fn main(args: Vec<String>) -> IDFC<()> {
+    if args.len() < 2 {
+        return Ok(show_help());
+    }
 
     // --stolen-- BORROWED from yx code :D
-	let cmd = &args[1].to_lowercase();
-	let args = &args[2..];
+    let cmd = &args[1].to_lowercase();
+    let args = &args[2..];
 
-	let cmd = cmd_replace_aliases(cmd);
+    let cmd = cmd_replace_aliases(cmd);
 
-	match cmd {
-		"init"		=> {
-			assert_argc(args, &[0]);
-			sub::init()?
-		},
+    match cmd {
+        "init" => {
+            assert_argc(args, &[0]);
+            sub::init()?
+        }
 
-		"rm"		=> {
-			if args.len() < 1 {
-				println!(indoc! {"
+        "rm" => {
+            if args.len() < 1 {
+                println!(
+                    indoc! {"
 					{}
 					Batch-remove packages of \"hacking tools.\"
 					Usage: `pz rm <category>`
@@ -44,140 +47,150 @@ pub fn main(args: Vec<String>) -> IDFC<()>  {
 					packets
 					cracking
 					torrent
-				"}, LINE_SEPARATOR, LINE_SEPARATOR);
+				"},
+                    LINE_SEPARATOR, LINE_SEPARATOR
+                );
 
-				return Ok(())
-			}
-			
-			for target in args {
-				let lower = target.to_lowercase();
+                return Ok(());
+            }
 
-				match lower.as_str() {
-					"samba"		=> {
-						bash!("sudo apt-get remove .*smb.* .*samba.*")?
-					},
+            for target in args {
+                let lower = target.to_lowercase();
 
-					"webserver"	=> {
-						bash!("sudo apt-get remove lighttpd nginx .*apache.*")?
-					},
+                match lower.as_str() {
+                    "samba" => bash!("sudo apt-get remove .*smb.* .*samba.*")?,
 
-					"packets"	=> {
-						bash!("sudo apt-get remove \
-wireshark tcpdump netcat-traditional .*nmap.* nikto")?
-					},
+                    "webserver" => bash!("sudo apt-get remove lighttpd nginx .*apache.*")?,
 
-					"cracking"	=> {
-						bash!("sudo apt-get remove \
-ophcrack hashcat john hydra.* aircrack.*")?
-					},
+                    "packets" => bash!(
+                        "sudo apt-get remove \
+wireshark tcpdump netcat-traditional .*nmap.* nikto"
+                    )?,
 
-					"torrent"	=> {
-						bash!("sudo apt-get remove \
-deluge.* ktorrent kget qbittorrent rtorrent unworkable")?;
+                    "cracking" => bash!(
+                        "sudo apt-get remove \
+ophcrack hashcat john hydra.* aircrack.*"
+                    )?,
 
-						printdoc! {"
+                    "torrent" => {
+                        bash!(
+                            "sudo apt-get remove \
+deluge.* ktorrent kget qbittorrent rtorrent unworkable"
+                        )?;
+
+                        printdoc! {"
 							Consider removing `transmission` as well...
 							(never tried it, but it might give points)
 						"};
-					},
+                    }
 
-					_			=> todo!()
-				}
-			}
-		}
+                    _ => todo!(),
+                }
+            }
+        }
 
-		"audit"		=> {
-			assert_argc(args, &[0]);
-			sub::audit()?
-		},
+        "audit" => {
+            assert_argc(args, &[0]);
+            sub::audit()?
+        }
 
-		"passwd"	=> {
-			assert_argc(args, &[1, 2]);
-			sub::passwd(args)
-		},
+        "passwd" => {
+            assert_argc(args, &[1, 2]);
+            sub::passwd(args)
+        }
 
-		"list"		=> {
-			assert_argc(args, &[0, 1]);
-			
-			// unwrap_or requires an unnecessary String, at least the way I tried :/
-			let mode: &str = match args.first() {
-				Some(i) => i,
-				None => "list"
-			};
+        "list" => {
+            assert_argc(args, &[0, 1]);
 
-			match mode {
-				"sudo"	=> {
-					sub::list_sudo_users();
-				},
+            // unwrap_or requires an unnecessary String, at least the way I tried :/
+            let mode: &str = match args.first() {
+                Some(i) => i,
+                None => "list",
+            };
 
-				_		=> {
-					sub::list_users();
-				}
-			}
-		},
+            match mode {
+                "sudo" => {
+                    sub::list_sudo_users();
+                }
 
-		"refs"		=> {
-			assert_argc(args, &[0, 1]);
+                _ => {
+                    sub::list_users();
+                }
+            }
+        }
 
-			if let Some(page) = args.first() {
-				// resolve aliases
-				let page = &page.to_lowercase();
+        "refs" => {
+            assert_argc(args, &[0, 1]);
 
-				let page = match page.as_str() {
-					"checklist" |
-					"guide"		=> "clist",
+            if let Some(page) = args.first() {
+                // resolve aliases
+                let page = &page.to_lowercase();
 
-					_			=> page
-				};
+                let page = match page.as_str() {
+                    "checklist" | "guide" => "clist",
 
-				println!("Page: `{}`\n{}", page, LINE_SEPARATOR);
+                    _ => page,
+                };
 
-				let out = match page {
-					"clist"	=> include_str!("refs/checklist.txt"),
+                println!("Page: `{}`\n{}", page, LINE_SEPARATOR);
 
-					"apt"	=> include_str!("refs/apt.txt"),
-					"dnf"	=> include_str!("refs/dnf.txt"),
+                let out = match page {
+                    "clist" => include_str!("refs/checklist.txt"),
 
-					_		=> panic!("Not found!")
-				};
+                    "apt" => include_str!("refs/apt.txt"),
+                    "dnf" => include_str!("refs/dnf.txt"),
 
-				println!("{}", out);
-			} else {
-				println!(include_str!("refs/pages.txt"));
-			}
-		},
+                    _ => panic!("Not found!"),
+                };
 
-        _ => todo!()
+                println!("{}", out);
+            } else {
+                println!(include_str!("refs/pages.txt"));
+            }
+        }
+
+        _ => todo!(),
     }
 
-	Ok(())
+    Ok(())
 }
 
 pub fn show_help() {
-	println!("{}\n{}{}\n", LINE_SEPARATOR, include_str!("help.txt"), LINE_SEPARATOR);
+    println!(
+        "{}\n{}{}\n",
+        LINE_SEPARATOR,
+        include_str!("help.txt"),
+        LINE_SEPARATOR
+    );
 }
 
 pub fn assert_argc(args: &[String], lens: &[usize]) {
-	let len = args.len();
+    let len = args.len();
 
-	let mapped: Vec<String> = lens.iter().map(|&id| id.to_string()).collect();
-	let joined = mapped.join("|");
+    let mapped: Vec<String> = lens.iter().map(|&id| id.to_string()).collect();
+    let joined = mapped.join("|");
 
-	if !lens.contains(&len) {
-		panic!("This subcommand requires {} arguments, but you only gave {}!", joined, len);
-	}
+    if !lens.contains(&len) {
+        panic!(
+            "This subcommand requires {} arguments, but you only gave {}!",
+            joined, len
+        );
+    }
 }
 
 pub fn assert_argc_gteq(args: &[String], required: usize) {
-	let len = args.len();
+    let len = args.len();
 
-	if len < required {
-		panic!("This subcommand requires at least {} arguments, but you only gave {}!", required, len);
-	}
+    if len < required {
+        panic!(
+            "This subcommand requires at least {} arguments, but you only gave {}!",
+            required, len
+        );
+    }
 }
 
 fn cmd_replace_aliases<'a>(cmd: &'a String) -> &'a str {
-	match cmd.as_str() {
-		_		=> &cmd
-	}
+    match cmd.as_str() {
+        _ => &cmd,
+    }
 }
