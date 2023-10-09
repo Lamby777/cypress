@@ -86,6 +86,10 @@ pub fn initscr(allocator: std.mem.Allocator) !Window {
     return Window{ .win = res, .allocator = allocator };
 }
 
+pub fn move(y: u16, x: u16) !void {
+    _ = try checkError(c.move(y, x));
+}
+
 pub fn noecho() !void {
     _ = try checkError(c.noecho());
 }

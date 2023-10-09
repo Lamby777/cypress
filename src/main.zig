@@ -34,7 +34,7 @@ pub fn main() !void {
     try curses.start_color(); // Enable color support
     try curses.cbreak();
     try curses.noecho();
-    _ = try curses.curs_set(0);
+    // _ = try curses.curs_set(0);
 
     // Define color pairs
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
@@ -101,5 +101,6 @@ fn getCmd(win: *const curses.Window) !CommandBuffer {
         try win.mvaddstr(CMD_LINENO, 2, "-----------");
         try win.mvaddch(CMD_LINENO + 1, 2, CMD_PROMPT);
         try win.mvaddstr(CMD_LINENO + 1, 4, cmd[0..cursorPos]);
+        try curses.move(CMD_LINENO + 1, 4 + cursorPos);
     }
 }
