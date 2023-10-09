@@ -6,9 +6,13 @@ const mem = std.mem;
 const Allocator = mem.Allocator;
 
 // the useful constants that might need to be changed
-const CMD_BUFFER_SIZE = 1024;
+const CMD_BUFFER_SIZE = 64;
+const CMD_PROMPT = '>';
+const TOP_LINENO = 3;
+const CMD_LINENO = 5;
 
 // the "ignore this magic number" constants
+const CommandBuffer = [CMD_BUFFER_SIZE]u8;
 const BACKSPACE_CH = 127;
 const ENTER_CH = 10;
 
@@ -46,11 +50,11 @@ pub fn main() !void {
 }
 
 fn drawWin(win: *const curses.Window) !void {
-    // Print some text
+    try win.erase();
     try win.attron(pair1.attr());
 
-    try win.mvaddstr(1, 2, fmt.comptimePrint("", .{}));
-    try win.mvaddstr(4, 2, "q to quit");
+    try win.mvaddstr(TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
+    try win.mvaddstr(TOP_LINENO + 1, 2, "q to quit");
     try win.boxme();
 }
 
@@ -58,10 +62,10 @@ fn intToStr(ally: *Allocator, i: i32) ![]const u8 {
     return fmt.allocPrint(ally.*, "{d}", .{i});
 }
 
-fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
+fn getCmd(ally: *Allocator, win: *const curses.Window) !CommandBuffer {
     _ = ally;
     var cursorPos: u16 = 0;
-    var cmd: [CMD_BUFFER_SIZE]u8 = undefined;
+    var cmd: CommandBuffer = undefined;
 
     // we don't need to worry about arrow keys and stuff...
     // this "shell" is gonna be dead simple. the commands
@@ -76,19 +80,22 @@ fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
         switch (key) {
             // user pressed backspace
             BACKSPACE_CH => {
-                try win.mvaddch(40, cursorPos, 'a');
                 if (cursorPos > 0) {
                     cursorPos -= 1;
                 }
             },
 
+            // user pressed enter
+            ENTER_CH => {
+                return cmd;
+            },
+
             // user typed a character
-            // you can't be serious...
             0...ENTER_CH - 1, ENTER_CH + 1...BACKSPACE_CH - 1, BACKSPACE_CH + 1...255 => {
-                // try win.mvaddstr(18, 3, "   ");
-                // try win.mvaddstr(18, 3, try intToStr(ally, key));
                 cmd[cursorPos] = @intCast(ch);
-                cursorPos += 1;
+                if (cursorPos < CMD_BUFFER_SIZE - 1) {
+                    cursorPos += 1;
+                }
             },
 
             // don't handle unicode sussery wussery shenanigans
@@ -96,6 +103,8 @@ fn getCmd(ally: *Allocator, win: *const curses.Window) !void {
         }
 
         // write cmd buffer to prompt
-        try win.mvaddstr(20, 3, cmd[0..cursorPos]);
+        try win.mvaddstr(CMD_LINENO, 2, "-----------");
+        try win.mvaddch(CMD_LINENO + 1, 2, CMD_PROMPT);
+        try win.mvaddstr(CMD_LINENO + 1, 4, cmd[0..cursorPos]);
     }
 }
