@@ -4,18 +4,15 @@
 */
 
 use indoc::{indoc, printdoc};
+use libdx::Result;
 use sh_inline::*;
-use std::fs;
 use users::*;
 
 const LINE_SEPARATOR: &str = "--------------------------------------------------";
 
 mod sub;
 
-mod classes;
-use classes::*;
-
-pub fn main(args: Vec<String>) -> IDFC<()> {
+pub fn main(args: Vec<String>) -> Result<()> {
     if args.len() < 2 {
         return Ok(show_help());
     }

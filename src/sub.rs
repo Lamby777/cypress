@@ -1,12 +1,13 @@
 // Subcommand stuff
 
-use crate::{all_users, bash, LinuxFile, RWXOctal, User, IDFC, LINE_SEPARATOR};
-use std::{borrow::Borrow, path::Path};
+use crate::{all_users, bash, User, LINE_SEPARATOR};
+use libdx::Result;
+use std::borrow::Borrow;
 use users::get_current_uid;
 
 const LS_R_PATH: &str = "~/Desktop/homedir-recursive.txt";
 
-pub fn init() -> IDFC<()> {
+pub fn init() -> Result<()> {
     bash!(include_str!("sh/init.sh"))?;
 
     println!("\nCyPatrina 1.1 init script complete!");
@@ -14,7 +15,7 @@ pub fn init() -> IDFC<()> {
     Ok(())
 }
 
-pub fn audit() -> IDFC<()> {
+pub fn audit() -> Result<()> {
     // Check for common security vulnerabilities
 
     println!("Unauthorized files:");
@@ -41,24 +42,6 @@ pub fn audit() -> IDFC<()> {
 
     println!("\nNo-user files:");
     bash!(r"sudo find / -xdev \( -nouser -o -nogroup \) -print")?;
-
-    // File Permission Checks
-    println!("\nChecking commonly tampered files' permissions...");
-
-    println!("<stuff after this line is just for debugging>");
-    let perm_checks: Vec<(&str, RWXOctal)> =
-        vec![("/etc/passwd", 0b110100100), ("/etc/shadow", 0b110100100)];
-
-    assert_file_perms("/etc/passwd", 0b110100100)?;
-
-    Ok(())
-}
-
-fn assert_file_perms(path: impl AsRef<Path>, perms: RWXOctal) -> IDFC<()> {
-    // Permissions of the file should be AT MOST what is provided
-    let lf = LinuxFile::new(path);
-
-    println!("{:o}", lf.get_perms_octals()?);
 
     Ok(())
 }
