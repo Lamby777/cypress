@@ -10,6 +10,7 @@
 const std = @import("std");
 const curses = @import("curses.zig");
 const shell = @import("shell.zig");
+const cs = @import("consts.zig");
 
 // import aliases
 const heap = std.heap;
@@ -17,17 +18,7 @@ const fmt = std.fmt;
 const mem = std.mem;
 const Allocator = mem.Allocator;
 const processCmd = shell.processCmd;
-
-// the useful constants that might need to be changed
-const CMD_BUFFER_SIZE = 64;
-const CMD_PROMPT = '>';
-const TOP_LINENO = 3;
-const CMD_LINENO = 6;
-
-// the "ignore this magic number" constants
-const CommandBuffer = [CMD_BUFFER_SIZE]u8;
-const BACKSPACE_CH = 127;
-const ENTER_CH = 10;
+const CommandBuffer = cs.CommandBuffer;
 
 var pair1: curses.ColorPair = undefined;
 var win: curses.Window = undefined;
@@ -52,9 +43,9 @@ fn drawWin(ally: *Allocator) !void {
     const modeStr = try fmt.allocPrint(ally.*, "Current mode: {s}", .{mode.fmt()});
     defer ally.free(modeStr);
 
-    try win.mvaddstr(TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
-    try win.mvaddstr(TOP_LINENO + 1, 2, modeStr);
-    try win.mvaddstr(TOP_LINENO + 2, 2, "-----------");
+    try win.mvaddstr(cs.TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
+    try win.mvaddstr(cs.TOP_LINENO + 1, 2, modeStr);
+    try win.mvaddstr(cs.TOP_LINENO + 2, 2, "-----------");
     try win.boxme();
 }
 
@@ -80,15 +71,15 @@ pub fn main() !void {
 
     while (true) {
         const cmdEntered = try getCmd(&ally, 0);
-        processCmd(cmdEntered);
+        try processCmd(cmdEntered);
     }
 
     _ = try curses.endwin();
 }
 
 fn printCmdLine(cmd: []u8, offset: u8) !void {
-    var lineno = CMD_LINENO + offset;
-    try win.mvaddch(lineno + 1, 2, CMD_PROMPT);
+    var lineno = cs.CMD_LINENO + offset;
+    try win.mvaddch(lineno + 1, 2, cs.CMD_PROMPT);
     try win.mvaddstr(lineno, 4, cmd);
 }
 
@@ -96,7 +87,7 @@ fn printCmdLine(cmd: []u8, offset: u8) !void {
 fn getCmd(ally: *Allocator, lineOffset: u8) !CommandBuffer {
     var cursorPos: u16 = 0;
     var cmd: CommandBuffer = undefined;
-    var lineno = CMD_LINENO + lineOffset;
+    var lineno = cs.CMD_LINENO + lineOffset;
 
     // we don't need to worry about arrow keys and stuff...
     // this "shell" is gonna be dead simple. the commands
@@ -106,7 +97,7 @@ fn getCmd(ally: *Allocator, lineOffset: u8) !CommandBuffer {
     while (true) {
         // write cmd buffer to prompt
         try drawWin(ally);
-        try win.mvaddch(lineno + 1, 2, CMD_PROMPT);
+        try win.mvaddch(lineno + 1, 2, cs.CMD_PROMPT);
         try win.mvaddstr(lineno, 4, cmd[0..cursorPos]);
         try curses.move(lineno, 4 + cursorPos);
 
@@ -115,21 +106,21 @@ fn getCmd(ally: *Allocator, lineOffset: u8) !CommandBuffer {
 
         switch (key) {
             // user pressed backspace
-            BACKSPACE_CH => {
+            cs.BACKSPACE_CH => {
                 if (cursorPos > 0) {
                     cursorPos -= 1;
                 }
             },
 
             // user pressed enter
-            ENTER_CH => {
+            cs.ENTER_CH => {
                 return cmd;
             },
 
             // user typed a character
-            0...ENTER_CH - 1, ENTER_CH + 1...BACKSPACE_CH - 1, BACKSPACE_CH + 1...255 => {
+            0...cs.ENTER_CH - 1, cs.ENTER_CH + 1...cs.BACKSPACE_CH - 1, cs.BACKSPACE_CH + 1...255 => {
                 cmd[cursorPos] = @intCast(ch);
-                if (cursorPos < CMD_BUFFER_SIZE - 1) {
+                if (cursorPos < cs.CMD_BUFFER_SIZE - 1) {
                     cursorPos += 1;
                 }
             },
