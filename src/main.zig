@@ -18,13 +18,29 @@ const ENTER_CH = 10;
 
 var pair1: curses.ColorPair = undefined;
 var win: curses.Window = undefined;
+var mode: Mode = .Exec;
 
-fn drawWin() !void {
+const Mode = enum {
+    Exec,
+    Audit,
+
+    fn fmt(self: Mode) []const u8 {
+        switch (self) {
+            .Exec => return "EXEC",
+            .Audit => return "AUDIT",
+        }
+    }
+};
+
+fn drawWin(ally: *Allocator) !void {
     try win.erase();
     try win.attron(pair1.attr());
 
+    const modeStr = try fmt.allocPrint(ally.*, "Current mode: {s}", .{mode.fmt()});
+    defer ally.free(modeStr);
+
     try win.mvaddstr(TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
-    try win.mvaddstr(TOP_LINENO + 1, 2, "q to quit");
+    try win.mvaddstr(TOP_LINENO + 1, 2, modeStr);
     try win.mvaddstr(TOP_LINENO + 2, 2, "-----------");
     try win.boxme();
 }
@@ -50,7 +66,7 @@ pub fn main() !void {
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
 
     while (true) {
-        const cmdEntered = try getCmd(0);
+        const cmdEntered = try getCmd(&ally, 0);
         _ = cmdEntered;
         // processCmd(cmdEntered);
     }
@@ -58,7 +74,14 @@ pub fn main() !void {
     _ = try curses.endwin();
 }
 
-fn getCmd(lineOffset: u8) !CommandBuffer {
+fn printCmdLine(cmd: []u8, offset: u8) !void {
+    var lineno = CMD_LINENO + offset;
+    try win.mvaddch(lineno + 1, 2, CMD_PROMPT);
+    try win.mvaddstr(lineno, 4, cmd);
+}
+
+/// Prompts for 1 command until the user presses enter
+fn getCmd(ally: *Allocator, lineOffset: u8) !CommandBuffer {
     var cursorPos: u16 = 0;
     var cmd: CommandBuffer = undefined;
     var lineno = CMD_LINENO + lineOffset;
@@ -70,7 +93,7 @@ fn getCmd(lineOffset: u8) !CommandBuffer {
 
     while (true) {
         // write cmd buffer to prompt
-        try drawWin();
+        try drawWin(ally);
         try win.mvaddch(lineno + 1, 2, CMD_PROMPT);
         try win.mvaddstr(lineno, 4, cmd[0..cursorPos]);
         try curses.move(lineno, 4 + cursorPos);
