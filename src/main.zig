@@ -9,7 +9,7 @@ const Allocator = mem.Allocator;
 const CMD_BUFFER_SIZE = 64;
 const CMD_PROMPT = '>';
 const TOP_LINENO = 3;
-const CMD_LINENO = 5;
+const CMD_LINENO = 6;
 
 // the "ignore this magic number" constants
 const CommandBuffer = [CMD_BUFFER_SIZE]u8;
@@ -17,6 +17,19 @@ const BACKSPACE_CH = 127;
 const ENTER_CH = 10;
 
 var pair1: curses.ColorPair = undefined;
+
+fn drawWin(win: *const curses.Window) !void {
+    try win.erase();
+    try win.attron(pair1.attr());
+
+    try win.mvaddstr(TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
+    try win.mvaddstr(TOP_LINENO + 1, 2, "q to quit");
+    try win.mvaddstr(TOP_LINENO + 2, 2, "-----------");
+    try win.boxme();
+
+    // i have no idea why this needs a +1, but it does
+    try win.mvaddch(CMD_LINENO + 1, 2, CMD_PROMPT);
+}
 
 pub fn main() !void {
     var gpa = heap.GeneralPurposeAllocator(.{}){};
@@ -40,22 +53,13 @@ pub fn main() !void {
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
 
     while (true) {
-        try drawWin(&win);
+        // try drawWin(&win);
 
         const cmdEntered = try getCmd(&win);
         _ = cmdEntered;
     }
 
     _ = try curses.endwin();
-}
-
-fn drawWin(win: *const curses.Window) !void {
-    try win.erase();
-    try win.attron(pair1.attr());
-
-    try win.mvaddstr(TOP_LINENO, 2, fmt.comptimePrint("Cypress v1.2", .{}));
-    try win.mvaddstr(TOP_LINENO + 1, 2, "q to quit");
-    try win.boxme();
 }
 
 fn getCmd(win: *const curses.Window) !CommandBuffer {
@@ -68,10 +72,14 @@ fn getCmd(win: *const curses.Window) !CommandBuffer {
     // typing over the old character will take much time.
 
     while (true) {
+        // write cmd buffer to prompt
+        try drawWin(win);
+        try win.mvaddstr(CMD_LINENO, 4, cmd[0..cursorPos]);
+        try curses.move(CMD_LINENO, 4 + cursorPos);
+
         const key = try win.getch();
         const ch: u32 = @intCast(key);
 
-        try drawWin(win);
         switch (key) {
             // user pressed backspace
             BACKSPACE_CH => {
@@ -96,11 +104,5 @@ fn getCmd(win: *const curses.Window) !CommandBuffer {
             // don't handle unicode sussery wussery shenanigans
             else => {},
         }
-
-        // write cmd buffer to prompt
-        try win.mvaddstr(CMD_LINENO, 2, "-----------");
-        try win.mvaddch(CMD_LINENO + 1, 2, CMD_PROMPT);
-        try win.mvaddstr(CMD_LINENO + 1, 4, cmd[0..cursorPos]);
-        try curses.move(CMD_LINENO + 1, 4 + cursorPos);
     }
 }
