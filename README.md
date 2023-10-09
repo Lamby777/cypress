@@ -1,5 +1,7 @@
-# Cypress (CyPatrina Toolchain v1.2)
+# Cypress
 
-Open-source Linux system hardening toolkit created for CyberPatriot
+Previously known as `pizza`/`pz` (2021-2022) and `CyPatrina` (2020-2021)
 
-Go `Erm... Acktschuyually! 🤓`!
+Open-sus ඞ ඞ ඞ system hardening toolkit created for CyberPatriot
+
+Go team `Erm... Acktschuyually! 🤓`!
