@@ -17,8 +17,9 @@ const BACKSPACE_CH = 127;
 const ENTER_CH = 10;
 
 var pair1: curses.ColorPair = undefined;
+var win: curses.Window = undefined;
 
-fn drawWin(win: *const curses.Window) !void {
+fn drawWin() !void {
     try win.erase();
     try win.attron(pair1.attr());
 
@@ -43,26 +44,23 @@ pub fn main() !void {
     var ally = gpa.allocator();
 
     // Initialize the curses library
-    const win = try curses.initscr(ally);
+    win = try curses.initscr(ally);
     try curses.start_color(); // Enable color support
     try curses.cbreak();
     try curses.noecho();
-    // _ = try curses.curs_set(0);
 
     // Define color pairs
     pair1 = try curses.ColorPair.init(1, curses.COLOR_RED, curses.COLOR_BLACK);
 
     while (true) {
-        // try drawWin(&win);
-
-        const cmdEntered = try getCmd(&win);
+        const cmdEntered = try getCmd();
         _ = cmdEntered;
     }
 
     _ = try curses.endwin();
 }
 
-fn getCmd(win: *const curses.Window) !CommandBuffer {
+fn getCmd() !CommandBuffer {
     var cursorPos: u16 = 0;
     var cmd: CommandBuffer = undefined;
 
@@ -73,7 +71,7 @@ fn getCmd(win: *const curses.Window) !CommandBuffer {
 
     while (true) {
         // write cmd buffer to prompt
-        try drawWin(win);
+        try drawWin();
         try win.mvaddstr(CMD_LINENO, 4, cmd[0..cursorPos]);
         try curses.move(CMD_LINENO, 4 + cursorPos);
 
