@@ -4,10 +4,10 @@
 # Deep-Fried Tables
 
 # Enforce correct permissions on auth stuff
-sudo chmod 640 /etc/passwd
-sudo chmod 640 /etc/shadow
-sudo chmod 640 /etc/group
-sudo chmod 640 /etc/gshadow
+sudo chmod 644 /etc/passwd
+sudo chmod 600 /etc/shadow
+sudo chmod 644 /etc/group
+sudo chmod 600 /etc/gshadow
 
 # Lock Root Account
 sudo passwd -l root
