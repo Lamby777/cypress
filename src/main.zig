@@ -71,7 +71,7 @@ pub fn main() !void {
 
     while (true) {
         const cmdEntered = try getCmd(&ally, 0);
-        try processCmd(cmdEntered);
+        try processCmd(&ally, cmdEntered);
     }
 
     _ = try curses.endwin();
