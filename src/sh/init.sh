@@ -31,6 +31,10 @@ function ubuntuFn {
 	apt update
 	apt -y upgrade
 
+  # install neovim (do chezmoi manually with the other script)
+  wget -O /usr/local/bin/nvim https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+  chmod u+x /usr/local/bin/nvim
+
 	# Install all these packages, whether it be for points, or for more efficient patching
 	apt -y install python3 ufw gufw aptitude mlocate
 
