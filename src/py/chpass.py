@@ -7,6 +7,7 @@
 
 # usage:
 # ./chpass.py set <username>
+# username: the user you don't want to change the password for
 
 import pwd, os, sys
 
