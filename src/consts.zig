@@ -2,7 +2,7 @@
 pub const CMD_BUFFER_SIZE = 64;
 pub const CMD_PROMPT = '>';
 pub const TOP_LINENO = 3;
-pub const CMD_LINENO = 6;
+pub const CMD_LINENO = 7;
 
 // the "ignore this magic number" constants
 pub const CommandBuffer = [CMD_BUFFER_SIZE]u8;

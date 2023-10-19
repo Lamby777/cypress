@@ -97,9 +97,9 @@ fn getCmd(ally: *Allocator, lineOffset: u8) !CommandBuffer {
     while (true) {
         // write cmd buffer to prompt
         try drawWin(ally);
-        try win.mvaddch(lineno + 1, 2, cs.CMD_PROMPT);
-        try win.mvaddstr(lineno + 1, 4, cmd[0..cursorPos]);
-        try curses.move(lineno + 1, 4 + cursorPos);
+        try win.mvaddch(lineno, 2, cs.CMD_PROMPT);
+        try win.mvaddstr(lineno, 4, cmd[0..cursorPos]);
+        try curses.move(lineno, 4 + cursorPos);
 
         const key = try win.getch();
         const ch: u32 = @intCast(key);
