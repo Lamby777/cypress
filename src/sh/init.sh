@@ -2,6 +2,12 @@
 
 # CyPatrina 1.2
 
+# ensure using sudo/root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit
+fi
+
 # Enforce correct permissions on auth stuff
 chmod 644 /etc/passwd
 chmod 600 /etc/shadow
